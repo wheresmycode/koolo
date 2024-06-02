@@ -87,6 +87,13 @@ func (a Diablo) BuildActions() (actions []action.Action) {
 		if a.Container.CharacterCfg.Game.Diablo.OnlyElites {
 			monsterFilter = data.MonsterEliteFilter()
 		}
+		if a.CharacterCfg.Companion.Enabled && a.CharacterCfg.Companion.Leader {
+			actions = append(actions,
+				//Clear area before TP
+				a.builder.ClearAreaAroundPlayer(30, data.MonsterAnyFilter()),
+				a.builder.OpenTPIfLeader(),
+			)
+		}
 
 		actions = slices.Concat(actions,
 			a.generateClearActions(entranceToStar, monsterFilter),
@@ -94,10 +101,12 @@ func (a Diablo) BuildActions() (actions []action.Action) {
 			a.generateClearActions(starToSeis, monsterFilter),
 			a.generateClearActions(starToInf, monsterFilter),
 		)
+
 	} else {
 		actions = append(actions,
 			// Travel to diablo spawn location
 			a.builder.MoveToCoords(diabloSpawnPosition),
+			a.builder.OpenTPIfLeader(),
 		)
 	}
 
