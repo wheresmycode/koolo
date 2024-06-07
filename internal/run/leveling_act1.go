@@ -211,14 +211,18 @@ func (a Leveling) andariel(d game.Data) []action.Action {
 						if itm.Name != "AntidotePotion" {
 							continue
 						}
-
-						pos := ui.GetScreenCoordsForItem(itm)
+						pos := a.UIManager.GetScreenCoordsForItem(itm)
 						helper.Sleep(500)
 
 						if x > 3 {
 							a.HID.Click(game.LeftButton, pos.X, pos.Y)
 							helper.Sleep(300)
-							a.HID.Click(game.LeftButton, ui.MercAvatarPositionX, ui.MercAvatarPositionY)
+							if d.LegacyGraphics {
+								a.HID.Click(game.LeftButton, ui.MercAvatarPositionXClassic, ui.MercAvatarPositionYClassic)
+							} else {
+								a.HID.Click(game.LeftButton, ui.MercAvatarPositionX, ui.MercAvatarPositionY)
+							}
+
 						} else {
 							a.HID.Click(game.RightButton, pos.X, pos.Y)
 						}

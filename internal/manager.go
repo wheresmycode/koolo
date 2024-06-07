@@ -6,6 +6,7 @@ import (
 	"runtime/debug"
 	"time"
 
+	"github.com/hectorgimenez/koolo/cmd/koolo/log"
 	"github.com/hectorgimenez/koolo/internal/action"
 	"github.com/hectorgimenez/koolo/internal/character"
 	"github.com/hectorgimenez/koolo/internal/config"
@@ -16,6 +17,7 @@ import (
 	"github.com/hectorgimenez/koolo/internal/pather"
 	"github.com/hectorgimenez/koolo/internal/run"
 	"github.com/hectorgimenez/koolo/internal/town"
+	"github.com/hectorgimenez/koolo/internal/ui"
 	"github.com/lxn/win"
 )
 
@@ -51,7 +53,12 @@ func (mng *SupervisorManager) Start(supervisorName string) error {
 		return fmt.Errorf("error loading config: %w", err)
 	}
 
-	supervisor, err := mng.buildSupervisor(supervisorName, mng.logger)
+	supervisorLogger, err := log.NewLogger(config.Koolo.Debug.Log, config.Koolo.LogSaveDirectory, supervisorName)
+	if err != nil {
+		return err
+	}
+
+	supervisor, err := mng.buildSupervisor(supervisorName, supervisorLogger)
 	if err != nil {
 		return err
 	}
@@ -165,6 +172,7 @@ func (mng *SupervisorManager) buildSupervisor(supervisorName string, logger *slo
 		PathFinder:    pf,
 		CharacterCfg:  cfg,
 		EventListener: mng.eventListener,
+		UIManager:     ui.NewManager(gr),
 	}
 	sm := town.NewShopManager(logger, bm, c)
 

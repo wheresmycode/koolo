@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
+	"slices"
 	"time"
 
 	"github.com/hectorgimenez/koolo/internal/action"
@@ -48,6 +49,7 @@ func (b *Bot) Run(ctx context.Context, firstRun bool, runs []run.Run) (err error
 	companionTPRequestedAt := time.Time{}
 	companionTPRequested := false
 	companionLeftGame := false
+
 	if b.c.CharacterCfg.Companion.Enabled && b.c.CharacterCfg.Companion.Leader {
 		b.c.EventListener.Register(func(ctx context.Context, e event.Event) error {
 			switch evt := e.(type) {
@@ -70,14 +72,17 @@ func (b *Bot) Run(ctx context.Context, firstRun bool, runs []run.Run) (err error
 	gameStartedAt := time.Now()
 	loadingScreensDetected := 0
 
+	actions := b.ab.NewGameHook()
 	for k, r := range runs {
 		event.Send(event.RunStarted(event.Text(b.supervisorName, "Starting run"), r.Name()))
 		runStart := time.Now()
 		b.logger.Info(fmt.Sprintf("Running: %s", r.Name()))
 
-		actions := b.ab.PreRunHook(firstRun)
-		actions = append(actions, r.BuildActions()...)
-		actions = append(actions, b.ab.PostRunHook(k == len(runs)-1)...)
+		actions = slices.Concat(actions,
+			b.ab.PreRunHook(firstRun),
+			r.BuildActions(),
+			b.ab.PostRunHook(k == len(runs)-1),
+		)
 		eachLoopActions := make([]action.Action, 0)
 
 		firstRun = false
@@ -144,7 +149,7 @@ func (b *Bot) Run(ctx context.Context, firstRun bool, runs []run.Run) (err error
 				}
 				// Some hacky stuff for companion mode, ideally should be encapsulated everything together in a different place
 				if d.CharacterCfg.Companion.Enabled {
-					if companionTPRequested {
+					if companionTPRequested && r.Name() == string(config.LevelingRun) {
 						companionTPRequested = false
 						actions = append([]action.Action{b.ab.OpenTPIfLeader()}, actions...)
 					}

@@ -59,6 +59,7 @@ type CharacterCfg struct {
 	CharacterName     string `yaml:"characterName"`
 	CommandLineArgs   string `yaml:"commandLineArgs"`
 	KillD2OnStop      bool   `yaml:"killD2OnStop"`
+	ClassicMode       bool   `yaml:"classicMode"`
 	EnableCubeRecipes bool   `yaml:"enableCubeRecipes"`
 	AuthMethod        string `yaml:"authMethod"`
 	Health            struct {
@@ -143,6 +144,7 @@ type CharacterCfg struct {
 		Leader           bool   `yaml:"leader"`
 		LeaderName       string `yaml:"leaderName"`
 		Attack           bool   `yaml:"attack"`
+		FollowLeader     bool   `yaml:"followLeader"`
 		GameNameTemplate string `yaml:"gameNameTemplate"`
 		GamePassword     string `yaml:"gamePassword"`
 	} `yaml:"companion"`

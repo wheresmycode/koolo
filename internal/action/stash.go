@@ -18,11 +18,7 @@ import (
 )
 
 const (
-	maxGoldPerStashTab   = 2500000
-	stashGoldBtnX        = 966
-	stashGoldBtnY        = 526
-	stashGoldBtnConfirmX = 547
-	stashGoldBtnConfirmY = 388
+	maxGoldPerStashTab = 2500000
 )
 
 func (b *Builder) Stash(forceStash bool) *Chain {
@@ -64,7 +60,8 @@ func (b *Builder) orderInventoryPotions(d game.Data) {
 			if d.CharacterCfg.Inventory.InventoryLock[i.Position.Y][i.Position.X] == 0 {
 				continue
 			}
-			screenPos := ui.GetScreenCoordsForItem(i)
+
+			screenPos := b.UIManager.GetScreenCoordsForItem(i)
 			helper.Sleep(100)
 			b.HID.Click(game.RightButton, screenPos.X, screenPos.Y)
 			helper.Sleep(200)
@@ -132,13 +129,13 @@ func (b *Builder) stashInventory(d game.Data, firstRun bool) {
 				r, res := b.CharacterCfg.Runtime.Rules.EvaluateAll(i)
 
 				if res != nip.RuleResultFullMatch && firstRun {
-					b.Logger.Debug(
+					b.Logger.Info(
 						fmt.Sprintf("Item %s [%s] stashed because it was found in the inventory during the first run.", i.Desc().Name, i.Quality.ToString()),
 					)
 					break
 				}
 
-				b.Logger.Debug(
+				b.Logger.Info(
 					fmt.Sprintf("Item %s [%s] stashed", i.Desc().Name, i.Quality.ToString()),
 					slog.String("nipFile", fmt.Sprintf("%s:%d", r.Filename, r.LineNumber)),
 					slog.String("rawRule", r.RawLine),
@@ -188,7 +185,7 @@ func (b *Builder) shouldStashIt(d game.Data, i data.Item, firstRun bool) bool {
 }
 
 func (b *Builder) stashItemAction(i data.Item, firstRun bool) bool {
-	screenPos := ui.GetScreenCoordsForItem(i)
+	screenPos := b.UIManager.GetScreenCoordsForItem(i)
 	b.HID.MovePointer(screenPos.X, screenPos.Y)
 	helper.Sleep(170)
 	screenshot := b.Reader.Screenshot()
@@ -212,30 +209,57 @@ func (b *Builder) stashItemAction(i data.Item, firstRun bool) bool {
 
 func (b *Builder) clickStashGoldBtn() {
 	helper.Sleep(170)
-	b.HID.Click(game.LeftButton, stashGoldBtnX, stashGoldBtnY)
-	helper.Sleep(1000)
-	b.HID.Click(game.LeftButton, stashGoldBtnConfirmX, stashGoldBtnConfirmY)
-	helper.Sleep(700)
+	if b.Reader.LegacyGraphics() {
+		b.HID.Click(game.LeftButton, ui.StashGoldBtnXClassic, ui.StashGoldBtnYClassic)
+		helper.Sleep(1000)
+		b.HID.Click(game.LeftButton, ui.StashGoldBtnConfirmXClassic, ui.StashGoldBtnConfirmYClassic)
+	} else {
+		b.HID.Click(game.LeftButton, ui.StashGoldBtnX, ui.StashGoldBtnY)
+		helper.Sleep(1000)
+		b.HID.Click(game.LeftButton, ui.StashGoldBtnConfirmX, ui.StashGoldBtnConfirmY)
+	}
+
 }
 
 func (b *Builder) switchTab(tab int) {
-	x := 107
-	y := 128
-	tabSize := 82
-	x = x + tabSize*tab - tabSize/2
+	if b.Reader.LegacyGraphics() {
+		x := ui.SwitchStashTabBtnXClassic
+		y := ui.SwitchStashTabBtnYClassic
 
-	b.HID.Click(game.LeftButton, x, y)
-	helper.Sleep(500)
+		tabSize := ui.SwitchStashTabBtnTabSizeClassic
+		x = x + tabSize*tab - tabSize/2
+		b.HID.Click(game.LeftButton, x, y)
+		helper.Sleep(500)
+	} else {
+		x := ui.SwitchStashTabBtnX
+		y := ui.SwitchStashTabBtnY
+
+		tabSize := ui.SwitchStashTabBtnTabSize
+		x = x + tabSize*tab - tabSize/2
+		b.HID.Click(game.LeftButton, x, y)
+		helper.Sleep(500)
+	}
 }
 
 func (b *Builder) SwitchStashTab(tab int) *Chain {
 	return NewChain(func(d game.Data) (actions []Action) {
-		x := 107
-		y := 128
-		tabSize := 82
-		x = x + tabSize*tab - tabSize/2
-		b.HID.Click(game.LeftButton, x, y)
-		helper.Sleep(500)
+		if d.LegacyGraphics {
+			x := ui.SwitchStashTabBtnXClassic
+			y := ui.SwitchStashTabBtnYClassic
+
+			tabSize := ui.SwitchStashTabBtnTabSizeClassic
+			x = x + tabSize*tab - tabSize/2
+			b.HID.Click(game.LeftButton, x, y)
+			helper.Sleep(500)
+		} else {
+			x := ui.SwitchStashTabBtnX
+			y := ui.SwitchStashTabBtnY
+
+			tabSize := ui.SwitchStashTabBtnTabSize
+			x = x + tabSize*tab - tabSize/2
+			b.HID.Click(game.LeftButton, x, y)
+			helper.Sleep(500)
+		}
 
 		return []Action{}
 	})

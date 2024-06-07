@@ -240,6 +240,7 @@ func (s *HttpServer) characterSettings(w http.ResponseWriter, r *http.Request) {
 		cfg.CharacterName = r.Form.Get("characterName")
 		cfg.CommandLineArgs = r.Form.Get("commandLineArgs")
 		cfg.KillD2OnStop = r.Form.Has("kill_d2_process")
+		cfg.ClassicMode = r.Form.Has("classic_mode")
 
 		// Bnet config
 		cfg.Username = r.Form.Get("username")
@@ -344,6 +345,7 @@ func (s *HttpServer) characterSettings(w http.ResponseWriter, r *http.Request) {
 		cfg.Companion.Enabled = r.Form.Has("companionEnabled")
 		cfg.Companion.Leader = r.Form.Has("companionLeader")
 		cfg.Companion.Attack = r.Form.Has("companionAttack")
+		cfg.Companion.FollowLeader = r.Form.Has("companionFollowLeader")
 		cfg.Companion.LeaderName = r.Form.Get("companionLeaderName")
 		cfg.Companion.GameNameTemplate = r.Form.Get("companionGameNameTemplate")
 		cfg.Companion.GamePassword = r.Form.Get("companionGamePassword")
