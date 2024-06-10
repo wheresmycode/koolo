@@ -71,6 +71,8 @@ func (f *Factory) BuildRuns() (runs []Run) {
 
 	for _, run := range f.container.CharacterCfg.Game.Runs {
 		switch run {
+		case config.BishiboshRun:
+			runs = append(runs, Bishibosh{baseRun})
 		case config.CountessRun:
 			runs = append(runs, Countess{baseRun})
 		case config.AndarielRun:
