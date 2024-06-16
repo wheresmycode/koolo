@@ -26,7 +26,8 @@ func (m Mephisto) BuildActions() []action.Action {
 		m.builder.WayPoint(area.DuranceOfHateLevel2), // Moving to starting point (Durance of Hate Level 2)
 		m.builder.MoveToArea(area.DuranceOfHateLevel3),
 		m.builder.MoveToCoords(mephistoSafePosition), // Travel to boss position
-		m.char.KillMephisto(),                        // Kill Mephisto
+		m.builder.OpenTPIfLeader(),
+		m.char.KillMephisto(), // Kill Mephisto
 	}
 
 	if m.CharacterCfg.Game.Mephisto.KillCouncilMembers || m.CharacterCfg.Game.Mephisto.OpenChests {
