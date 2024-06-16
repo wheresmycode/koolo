@@ -82,25 +82,23 @@ func (a Diablo) BuildActions() (actions []action.Action) {
 		a.builder.MoveToCoords(chaosSanctuaryEntrancePosition),
 	)
 
-	// Let's move to a safe area and open the portal in companion mode
-	if a.CharacterCfg.Companion.Enabled && a.CharacterCfg.Companion.Leader {
-		actions = append(actions,
-			a.builder.MoveToCoords(diabloSpawnPosition),
-			a.builder.OpenTPIfLeader(),
-			a.builder.ClearAreaAroundPlayer(50, data.MonsterAnyFilter()),
-		)
-	}
-
 	if a.Container.CharacterCfg.Game.Diablo.ClearArea {
 		monsterFilter := data.MonsterAnyFilter()
 		if a.Container.CharacterCfg.Game.Diablo.OnlyElites {
 			monsterFilter = data.MonsterEliteFilter()
 		}
-		if a.CharacterCfg.Companion.Enabled && a.CharacterCfg.Companion.Leader {
+		if a.CharacterCfg.Companion.Enabled && a.CharacterCfg.Companion.Leader && a.Container.CharacterCfg.Game.Diablo.ClearArea {
 			actions = append(actions,
 				//Clear area before TP
-				a.builder.ClearAreaAroundPlayer(30, data.MonsterAnyFilter()),
+				a.builder.ClearAreaAroundPlayer(20, data.MonsterAnyFilter()),
 				a.builder.OpenTPIfLeader(),
+			)
+		}
+		if a.CharacterCfg.Companion.Enabled && a.CharacterCfg.Companion.Leader && a.Container.CharacterCfg.Game.Diablo.OnlyElites {
+			actions = append(actions,
+				a.builder.MoveToCoords(diabloSpawnPosition),
+				a.builder.OpenTPIfLeader(),
+				a.builder.ClearAreaAroundPlayer(40, data.MonsterAnyFilter()),
 			)
 		}
 
@@ -111,12 +109,6 @@ func (a Diablo) BuildActions() (actions []action.Action) {
 			a.generateClearActions(starToInf, monsterFilter),
 		)
 
-	} else {
-		actions = append(actions,
-			// Travel to diablo spawn location
-			a.builder.MoveToCoords(diabloSpawnPosition),
-			a.builder.OpenTPIfLeader(),
-		)
 	}
 
 	seals := []object.Name{object.DiabloSeal4, object.DiabloSeal5, object.DiabloSeal3, object.DiabloSeal2, object.DiabloSeal1}
