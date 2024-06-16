@@ -37,6 +37,7 @@ func (s Baal) BuildActions() (actions []action.Action) {
 		s.builder.MoveToCoords(baalThronePosition),
 		// Kill monsters inside Baal throne
 		s.checkForSoulsOrDolls(),
+		s.builder.OpenTPIfLeader(),
 		s.builder.ClearAreaAroundPlayer(50, data.MonsterAnyFilter()),
 	)
 
