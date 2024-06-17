@@ -82,22 +82,25 @@ func (s Companion) BuildActions() []action.Action {
 					s.builder.WayPoint(town.GetTownByArea(leaderRosterMember.Area).TownArea()),
 				}
 			}
-
+			//follow the leader trough entrances to other areas
 			if lastInteractionEvent != nil {
 				switch lastInteractionEvent.InteractionType {
 				case event.InteractionTypeEntrance:
 					a := area.ID(lastInteractionEvent.ID)
 					lastInteractionEvent = nil
 					if !d.PlayerUnit.Area.IsTown() {
+						s.Logger.Debug("Following Leader to next area " + a.Area().Name)
 						return []action.Action{
 							s.builder.MoveToArea(a),
 						}
 					}
+				//follow the leader trough portals to other areas
 				case event.InteractionTypeObject:
 					oName := object.Name(lastInteractionEvent.ID)
 					lastInteractionEvent = nil
 					o, found := d.Objects.FindOne(oName)
-					if found && ((o.IsWaypoint() && !d.PlayerUnit.Area.IsTown()) || o.IsRedPortal()) {
+					if found && ((o.IsWaypoint() && !d.PlayerUnit.Area.IsTown()) || o.IsRedPortal() || o.Name == object.BaalsPortal) {
+						s.Logger.Debug("Using " + o.Name.Desc().Name + " to follow Leader")
 						return []action.Action{
 							s.builder.InteractObject(oName, func(dat game.Data) bool {
 								if o.IsWaypoint() {
@@ -140,13 +143,23 @@ func (s Companion) BuildActions() []action.Action {
 			}
 
 			// Is leader too far away?
-			if pather.DistanceFromMe(d, leaderRosterMember.Position) > 100 {
+			if pather.DistanceFromMe(d, leaderRosterMember.Position) > 125 {
 				// In some cases this "follower in town -> use portal -> follower outside town -> use portal"
 				// loop can go on forever. But it is responsibility of a leader to not cause it...
 
 				// Follower in town
 				if d.PlayerUnit.Area.IsTown() {
-					// Request a TP
+					// Request a TP (chaos or baalrun)
+					if leaderRosterMember.Area.Area().ID == 108 || leaderRosterMember.Area.Area().ID == 131 {
+						if pather.DistanceFromMe(d, town.GetTownByArea(d.PlayerUnit.Area).TPWaitingArea(d)) < 10 && !tpRequested {
+							event.Send(event.CompanionRequestedTP(event.Text(s.Supervisor, "Baal or CS TP Requested")))
+							tpRequested = true
+							return []action.Action{
+								s.builder.Wait(time.Second),
+							}
+						}
+					}
+					// Request a TP (common)
 					if pather.DistanceFromMe(d, town.GetTownByArea(d.PlayerUnit.Area).TPWaitingArea(d)) < 10 && !tpRequested {
 						event.Send(event.CompanionRequestedTP(event.Text(s.Supervisor, "TP Requested")))
 						tpRequested = true
@@ -157,6 +170,7 @@ func (s Companion) BuildActions() []action.Action {
 
 					if p, foundPortal := getClosestPortal(d, leaderRosterMember.Name); foundPortal && !leaderRosterMember.Area.IsTown() {
 						if p.ID != portalUsedToGoCity {
+
 							tpRequested = false
 							return []action.Action{
 								s.builder.UsePortalFrom(leaderRosterMember.Name),
@@ -199,7 +213,7 @@ func (s Companion) BuildActions() []action.Action {
 					}
 
 					return []action.Action{
-						s.builder.ItemPickup(false, 8),
+						s.builder.ItemPickup(false, 10),
 						s.builder.Wait(100),
 					}
 				}
@@ -254,6 +268,8 @@ func (s Companion) killMonsterInCompanionMode(m data.Monster) action.Action {
 		return s.char.KillMephisto()
 	case npc.Diablo:
 		return s.char.KillDiablo()
+	case npc.BaalCrab:
+		return s.char.KillBaal()
 	}
 
 	return s.char.KillMonsterSequence(func(d game.Data) (data.UnitID, bool) {

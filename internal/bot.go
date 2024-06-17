@@ -48,6 +48,7 @@ func NewBot(
 func (b *Bot) Run(ctx context.Context, firstRun bool, runs []run.Run) (err error) {
 	companionTPRequestedAt := time.Time{}
 	companionTPRequested := false
+	companionRunTPRequested := false
 	companionLeftGame := false
 
 	if b.c.CharacterCfg.Companion.Enabled && b.c.CharacterCfg.Companion.Leader {
@@ -56,7 +57,11 @@ func (b *Bot) Run(ctx context.Context, firstRun bool, runs []run.Run) (err error
 			case event.CompanionRequestedTPEvent:
 				if time.Since(companionTPRequestedAt) > time.Second*5 {
 					companionTPRequestedAt = time.Now()
-					companionTPRequested = true
+					if e.Message() == "Baal or CS TP Requested" {
+						companionRunTPRequested = true
+					} else {
+						companionTPRequested = true
+					}
 				}
 			case event.GameFinishedEvent:
 				cmp := config.Characters[evt.Supervisor()].Companion
@@ -149,8 +154,9 @@ func (b *Bot) Run(ctx context.Context, firstRun bool, runs []run.Run) (err error
 				}
 				// Some hacky stuff for companion mode, ideally should be encapsulated everything together in a different place
 				if d.CharacterCfg.Companion.Enabled {
-					if companionTPRequested && r.Name() == string(config.LevelingRun) {
+					if companionRunTPRequested || companionTPRequested && r.Name() == string(config.LevelingRun) {
 						companionTPRequested = false
+						companionRunTPRequested = false
 						actions = append([]action.Action{b.ab.OpenTPIfLeader()}, actions...)
 					}
 					if companionLeftGame {
