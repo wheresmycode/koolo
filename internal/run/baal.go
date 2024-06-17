@@ -35,25 +35,27 @@ func (s Baal) BuildActions() (actions []action.Action) {
 		s.builder.MoveToArea(area.TheWorldStoneKeepLevel3),
 		s.builder.MoveToArea(area.ThroneOfDestruction),
 		s.builder.MoveToCoords(baalThronePosition),
-		// Kill monsters inside Baal throne
 		s.checkForSoulsOrDolls(),
-		s.builder.OpenTPIfLeader(),
-		s.builder.ClearAreaAroundPlayer(50, data.MonsterAnyFilter()),
 	)
 
 	// Let's move to a safe area and open the portal in companion mode
 	if s.CharacterCfg.Companion.Enabled && s.CharacterCfg.Companion.Leader {
 		actions = append(actions,
 			s.builder.MoveToCoords(data.Position{
-				X: 15116,
-				Y: 5071,
+				X: 15116, //15116, 5071 -> is lower right
+				Y: 5003,  //15116, 5003 -> is upper right
 			}),
+			//clear tp area
+			s.builder.ClearAreaAroundPlayer(8, data.MonsterAnyFilter()),
 			s.builder.OpenTPIfLeader(),
+			s.builder.Buff(),
 		)
 	}
+	// Kill monsters inside Baal throne
+	actions = append(actions, s.builder.ClearAreaAroundPlayer(50, data.MonsterAnyFilter()))
 
-	// Come back to previous position
-	actions = append(actions, s.builder.Buff(), s.builder.MoveToCoords(baalThronePosition))
+	// Come back to previous position and buff
+	actions = append(actions, s.builder.MoveToCoords(baalThronePosition), s.builder.Buff())
 
 	lastWave := false
 	actions = append(actions, action.NewChain(func(d game.Data) []action.Action {
@@ -93,7 +95,7 @@ func (s Baal) BuildActions() (actions []action.Action) {
 				return d.PlayerUnit.Area == area.TheWorldstoneChamber
 			}),
 			s.char.KillBaal(),
-			s.builder.ItemPickup(true, 50),
+			s.builder.ItemPickup(true, 40),
 		)
 	}
 
