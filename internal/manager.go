@@ -202,6 +202,7 @@ func (mng *SupervisorManager) rearrangeWindows() {
 	var windowBorderX int32 = 2   // left + right window border is 2px
 	var windowBorderY int32 = 40  // upper window border is usually 40px
 	var windowOffsetX int32 = -10 // offset horizontal window placement by -10 pixel
+	var windowOffsetY int32 = -40 // offset vertical window placement by -40 pixel (will put the titlebar for the first row of windows out of sight)
 	maxColumns := width / (1280 + windowBorderX)
 	maxRows := height / (720 + windowBorderY)
 
@@ -222,17 +223,17 @@ func (mng *SupervisorManager) rearrangeWindows() {
 		}
 
 		if row <= maxRows {
-			sp.SetWindowPosition(int(column*(1280+windowBorderX)+windowOffsetX), int(row*(720+windowBorderY)))
+			sp.SetWindowPosition(int(column*(1280+windowBorderX)+windowOffsetX), int(row*(720+windowBorderY)+windowOffsetY))
 			mng.logger.Debug(
 				"Window Positions",
 				slog.String("supervisor", sp.Name()),
 				slog.String("column", strconv.FormatInt(int64(column), 10)),
 				slog.String("row", strconv.FormatInt(int64(row), 10)),
-				slog.String("position", strconv.FormatInt(int64(column*(1280+windowBorderX)+windowOffsetX), 10)+"x"+strconv.FormatInt(int64(row*(720+windowBorderY)), 10)),
+				slog.String("position", strconv.FormatInt(int64(column*(1280+windowBorderX)+windowOffsetX), 10)+"x"+strconv.FormatInt(int64(row*(720+windowBorderY)+windowOffsetY), 10)),
 			)
 			column++
 		} else {
-			mng.logger.Debug("Window position of supervisor " + sp.Name() + " was not changed, no free space for it")
+			mng.logger.Debug("Window position of supervisor " + sp.Name() + " was not changed, there is no free space for it")
 		}
 	}
 }
