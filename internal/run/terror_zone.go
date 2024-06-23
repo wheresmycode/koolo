@@ -92,6 +92,11 @@ func (a TerrorZone) AvailableTZs(d game.Data) []area.ID {
 
 func (a TerrorZone) buildTZAction(dstArea area.ID) action.Action {
 	return action.NewChain(func(d game.Data) (actions []action.Action) {
+		_, found := area.WPAddresses[dstArea]
+		if !found { // don't try to use a WP to an area that is not reachable via WP
+			a.logger.Debug("TZ area skipped, could not find suitable WP", slog.String("area", dstArea.Area().Name))
+			return
+		}
 		if d.PlayerUnit.Area != dstArea && d.PlayerUnit.Area.IsTown() {
 			actions = append(actions, a.builder.WayPoint(dstArea))
 		}
