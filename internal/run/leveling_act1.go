@@ -26,20 +26,18 @@ func (a Leveling) act1() action.Action {
 		}
 
 		running = true
-		if lvl, _ := d.PlayerUnit.FindStat(stat.Level, 0); lvl.Value < 6 {
+		// do Den of Evil until level 6
+		if lvl, _ := d.PlayerUnit.FindStat(stat.Level, 0); lvl.Value < 6 || !d.Quests[quest.Act1DenOfEvil].Completed() {
 			return a.denOfEvil()
 		}
-		//if !d.Quests[quest.Act1DenOfEvil].Completed() {
-		//	return a.denOfEvil()
-		//}
-
 		if !a.isCainInTown(d) && !d.Quests[quest.Act1TheSearchForCain].Completed() {
 			return a.deckardCain(d)
 		}
+		// do Tristram Runs until level 14
 		if lvl, _ := d.PlayerUnit.FindStat(stat.Level, 0); lvl.Value < 14 {
 			return a.tristram()
 		}
-
+		// do Countess Runs until level 17
 		if lvl, _ := d.PlayerUnit.FindStat(stat.Level, 0); lvl.Value < 17 {
 			return a.countess()
 		}
@@ -166,26 +164,13 @@ func (a Leveling) deckardCain(d game.Data) (actions []action.Action) {
 }
 
 func (a Leveling) andariel(d game.Data) []action.Action {
-	a.logger.Info("Starting Countess and Andariel run")
-
-	actions := []action.Action{}
-	actions = append(actions, Countess{baseRun: a.baseRun}.BuildActions()...)
-
-	// Heal and refill pots
-	actions = append(actions,
-		a.builder.ReturnTown(),
-		a.builder.RecoverCorpse(),
-		a.builder.IdentifyAll(false),
-		a.builder.VendorRefill(false, true),
-		a.builder.Stash(false),
-	)
-
-	actions = append(actions,
+	a.logger.Info("Starting Andariel run")
+	actions := []action.Action{
 		a.builder.WayPoint(area.CatacombsLevel2),
 		a.builder.Buff(),
 		a.builder.MoveToArea(area.CatacombsLevel3),
 		a.builder.MoveToArea(area.CatacombsLevel4),
-	)
+	}
 	actions = append(actions, a.builder.ReturnTown()) // Return town to pickup pots and heal, just in case...
 
 	potsToBuy := 4
@@ -244,14 +229,9 @@ func (a Leveling) andariel(d game.Data) []action.Action {
 			return andarielStartingPosition, true
 		}),
 		a.char.KillAndariel(),
+		a.builder.ReturnTown(),
+		a.builder.InteractNPC(npc.Warriv, step.KeySequence(win.VK_HOME, win.VK_DOWN, win.VK_RETURN)),
 	)
-	//only move to act2 if above lvl 18
-	if lvl, _ := d.PlayerUnit.FindStat(stat.Level, 0); lvl.Value > 18 {
-		actions = append(actions,
-			a.builder.ReturnTown(),
-			a.builder.InteractNPC(npc.Warriv, step.KeySequence(win.VK_HOME, win.VK_DOWN, win.VK_RETURN)),
-		)
-	}
 
 	return actions
 }
