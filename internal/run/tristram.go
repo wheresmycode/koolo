@@ -38,7 +38,7 @@ func (a Tristram) BuildActions() []action.Action {
 	}
 
 	// Clear monsters around the portal
-	if a.CharacterCfg.Game.Tristram.ClearPortal {
+	if a.CharacterCfg.Game.Tristram.ClearPortal || a.CharacterCfg.Game.Runs[0] == "leveling" {
 		actions = append(actions, a.builder.ClearAreaAroundPlayer(20, data.MonsterAnyFilter()))
 	}
 
@@ -63,7 +63,7 @@ func (a Tristram) BuildActions() []action.Action {
 			})}
 		} else {
 			filter := data.MonsterAnyFilter()
-			if a.CharacterCfg.Game.Tristram.FocusOnElitePacks {
+			if a.CharacterCfg.Game.Tristram.FocusOnElitePacks && a.CharacterCfg.Game.Runs[0] != "leveling" {
 				filter = data.MonsterEliteFilter()
 			}
 			return []action.Action{a.builder.ClearArea(false, filter)}
