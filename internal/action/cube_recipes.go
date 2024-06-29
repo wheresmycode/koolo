@@ -16,6 +16,10 @@ type CubeRecipe struct {
 var (
 	recipies = []CubeRecipe{
 
+		{
+			Name:  "Flawless Amethyst",
+			Items: []string{"Amethyst", "Amethyst", "Amethyst"},
+		},
 		// Perfects
 		{
 			Name:  "Perfect Amethyst",
