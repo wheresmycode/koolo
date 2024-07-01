@@ -224,7 +224,6 @@ func (a Leveling) andariel(d game.Data) []action.Action {
 	)
 
 	actions = append(actions,
-		a.builder.UsePortalInTown(),
 		a.builder.MoveTo(func(d game.Data) (data.Position, bool) {
 			return andarielStartingPosition, true
 		}),
