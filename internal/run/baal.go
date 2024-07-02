@@ -85,8 +85,10 @@ func (s Baal) BuildActions() (actions []action.Action) {
 	}, action.RepeatUntilNoSteps()))
 
 	actions = append(actions, s.builder.ItemPickup(false, 30))
-
-	_, isLevelingChar := s.char.(action.LevelingCharacter)
+	isLevelingChar := false
+	if s.CharacterCfg.Game.Runs[0] == "leveling" { //always kill Baal when run is leveling
+		isLevelingChar = true
+	}
 	if s.CharacterCfg.Game.Baal.KillBaal || isLevelingChar {
 		actions = append(actions,
 			s.builder.Wait(time.Second*10),
