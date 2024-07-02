@@ -27,9 +27,11 @@ func BuildCharacter(logger *slog.Logger, container container.Container) (action.
 			return SorceressLeveling{BaseCharacter: bc}, nil
 		case "paladin":
 			return PaladinLeveling{BaseCharacter: bc}, nil
+		case "trapsin", "trapsin_leveling":
+			return TrapsinLeveling{BaseCharacter: bc}, nil
 		}
 
-		return nil, fmt.Errorf("leveling only available for sorceress and paladin")
+		return nil, fmt.Errorf("leveling only available for sorceress, paladin and trapsin")
 	}
 
 	switch strings.ToLower(container.CharacterCfg.Character.Class) {
@@ -43,6 +45,8 @@ func BuildCharacter(logger *slog.Logger, container container.Container) (action.
 		return Foh{BaseCharacter: bc}, nil
 	case "trapsin":
 		return Trapsin{BaseCharacter: bc}, nil
+	case "trapsin_leveling":
+		return TrapsinLeveling{BaseCharacter: bc}, nil
 	case "mosiac":
 		return MosiacSin{BaseCharacter: bc}, nil
 	case "winddruid":
