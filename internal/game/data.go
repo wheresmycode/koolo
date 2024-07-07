@@ -1,7 +1,6 @@
 package game
 
 import (
-	"math"
 	"time"
 
 	"github.com/hectorgimenez/d2go/pkg/data"
@@ -32,7 +31,8 @@ func (d Data) CanTeleport() bool {
 
 func (d Data) PlayerCastDuration() time.Duration {
 	secs := float64(d.PlayerUnit.CastingFrames())*0.04 + 0.01
-	secs = math.Max(0.40, secs)
+	//secs = math.Max(0.40, secs)
+	//this only makes sense during extreme lag an should have some kind of ping check
 
 	return time.Duration(secs*1000) * time.Millisecond
 }
