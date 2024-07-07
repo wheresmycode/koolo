@@ -57,7 +57,7 @@ func (b *Bot) Run(ctx context.Context, firstRun bool, runs []run.Run) (err error
 			case event.CompanionRequestedTPEvent:
 				if time.Since(companionTPRequestedAt) > time.Second*5 {
 					companionTPRequestedAt = time.Now()
-					if e.Message() == "Baal or CS TP Requested" {
+					if e.Message() == "Run TP Requested" {
 						companionRunTPRequested = true
 					} else {
 						companionTPRequested = true
@@ -154,7 +154,7 @@ func (b *Bot) Run(ctx context.Context, firstRun bool, runs []run.Run) (err error
 				}
 				// Some hacky stuff for companion mode, ideally should be encapsulated everything together in a different place
 				if d.CharacterCfg.Companion.Enabled {
-					if companionRunTPRequested || companionTPRequested && r.Name() == string(config.LevelingRun) {
+					if companionRunTPRequested || (companionTPRequested && r.Name() == string(config.LevelingRun)) {
 						companionTPRequested = false
 						companionRunTPRequested = false
 						actions = append([]action.Action{b.ab.OpenTPIfLeader()}, actions...)

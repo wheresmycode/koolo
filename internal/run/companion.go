@@ -143,24 +143,23 @@ func (s Companion) BuildActions() []action.Action {
 			}
 
 			// Is leader too far away?
-			if pather.DistanceFromMe(d, leaderRosterMember.Position) > 125 {
+			if pather.DistanceFromMe(d, leaderRosterMember.Position) > 150 {
 				// In some cases this "follower in town -> use portal -> follower outside town -> use portal"
 				// loop can go on forever. But it is responsibility of a leader to not cause it...
 
 				// Follower in town
 				if d.PlayerUnit.Area.IsTown() {
-					// Request a TP (chaos or baalrun)
-					if leaderRosterMember.Area.Area().ID == 108 || leaderRosterMember.Area.Area().ID == 131 {
-						if pather.DistanceFromMe(d, town.GetTownByArea(d.PlayerUnit.Area).TPWaitingArea(d)) < 10 && !tpRequested {
-							event.Send(event.CompanionRequestedTP(event.Text(s.Supervisor, "Baal or CS TP Requested")))
+					if pather.DistanceFromMe(d, town.GetTownByArea(d.PlayerUnit.Area).TPWaitingArea(d)) < 10 && !tpRequested {
+						// Request a TP (runs)
+						switch leaderRosterMember.Area.Area().ID {
+						case 39, 83, 108, 124, 131: //allows leader tp in cows,trav,chaos,nihlathak,baal
+							event.Send(event.CompanionRequestedTP(event.Text(s.Supervisor, "Run TP Requested")))
 							tpRequested = true
 							return []action.Action{
 								s.builder.Wait(time.Second),
 							}
 						}
-					}
-					// Request a TP (common)
-					if pather.DistanceFromMe(d, town.GetTownByArea(d.PlayerUnit.Area).TPWaitingArea(d)) < 10 && !tpRequested {
+						// Request a TP (leveling)
 						event.Send(event.CompanionRequestedTP(event.Text(s.Supervisor, "TP Requested")))
 						tpRequested = true
 						return []action.Action{
